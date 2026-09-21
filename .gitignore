@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.expo/
+.env
+.env.*
+!.env.example
+*.tsbuildinfo
+*.log
+.test-build/
+.agents/
+.local/
+attached_assets/

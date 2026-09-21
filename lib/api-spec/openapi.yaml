@@ -1,0 +1,3711 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: Stelvo AI Marketing Platform API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: auth
+    description: Authentication
+  - name: merchants
+    description: Merchant profile and settings
+  - name: suggestions
+    description: AI post suggestions
+  - name: generate
+    description: AI content generation
+  - name: publish
+    description: Social media publishing
+  - name: templates
+    description: Post templates
+  - name: analytics
+    description: Post analytics
+  - name: media
+    description: Media library
+  - name: social
+    description: Social account connections
+  - name: billing
+    description: Subscription and billing
+  - name: schedule
+    description: Scheduled posts
+  - name: recurring
+    description: Recurring schedules
+  - name: chat
+    description: FAQ chatbot
+  - name: loyalty-auth
+    description: Loyalty App customer authentication
+  - name: loyalty
+    description: Customer-side loyalty wallet, feed, and redemptions
+  - name: loyalty-business
+    description: Business-side loyalty program management
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  # ── Auth ──────────────────────────────────────────────────────────────────
+  /auth/signup:
+    post:
+      operationId: signup
+      tags: [auth]
+      summary: Create a new merchant account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignupInput"
+      responses:
+        "201":
+          description: Account created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Log in
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current merchant
+      responses:
+        "200":
+          description: Current merchant
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MerchantResponse"
+
+  /auth/forgot-password:
+    post:
+      operationId: forgotPassword
+      tags: [auth]
+      summary: Request password reset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ForgotPasswordInput"
+      responses:
+        "200":
+          description: Email sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /auth/reset-password:
+    post:
+      operationId: resetPassword
+      tags: [auth]
+      summary: Reset password with token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetPasswordInput"
+      responses:
+        "200":
+          description: Password reset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ── Merchants ─────────────────────────────────────────────────────────────
+  /merchants/me:
+    get:
+      operationId: getMerchant
+      tags: [merchants]
+      summary: Get merchant profile
+      responses:
+        "200":
+          description: Merchant profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MerchantResponse"
+    patch:
+      operationId: updateMerchant
+      tags: [merchants]
+      summary: Update merchant profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MerchantUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MerchantResponse"
+
+  /merchants/weather:
+    get:
+      operationId: getWeather
+      tags: [merchants]
+      summary: Get local weather for merchant
+      responses:
+        "200":
+          description: Weather data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WeatherData"
+
+  /merchants/stats:
+    get:
+      operationId: getMerchantStats
+      tags: [merchants]
+      summary: Get merchant post statistics
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MerchantStats"
+
+  # ── Suggestions ───────────────────────────────────────────────────────────
+  /suggestions/today:
+    get:
+      operationId: getTodaySuggestions
+      tags: [suggestions]
+      summary: Get today's AI post suggestions
+      responses:
+        "200":
+          description: Suggestions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuggestionsResponse"
+
+  /suggestions/refresh:
+    post:
+      operationId: refreshSuggestions
+      tags: [suggestions]
+      summary: Generate fresh suggestions
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshSuggestionsInput"
+      responses:
+        "200":
+          description: Fresh suggestions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuggestionsResponse"
+
+  /suggestions/{id}/skip:
+    post:
+      operationId: skipSuggestion
+      tags: [suggestions]
+      summary: Skip a suggestion
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Skipped
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /suggestions/{id}/use:
+    post:
+      operationId: useSuggestion
+      tags: [suggestions]
+      summary: Mark suggestion as used
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Marked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ── Chat (FAQ bot) ──────────────────────────────────────────────────────
+  /chat/faq:
+    post:
+      operationId: chatFaq
+      tags: [chat]
+      summary: Ask the Stelvo FAQ chatbot a question
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatFaqInput"
+      responses:
+        "200":
+          description: Chatbot reply
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatFaqReply"
+
+  # ── Generate ──────────────────────────────────────────────────────────────
+  /generate/captions:
+    post:
+      operationId: generateCaptions
+      tags: [generate]
+      summary: Generate AI captions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateCaptionsInput"
+      responses:
+        "200":
+          description: Generated captions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CaptionsResult"
+
+  /generate/image:
+    post:
+      operationId: generateImage
+      tags: [generate]
+      summary: Generate an AI image for the post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateImageInput"
+      responses:
+        "200":
+          description: Generated image
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImageResult"
+
+  /generate/video:
+    post:
+      operationId: generateVideo
+      tags: [generate]
+      summary: Generate a short AI video clip for the post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateVideoInput"
+      responses:
+        "200":
+          description: Generated video
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VideoGenResult"
+
+  /generate/save-post:
+    post:
+      operationId: savePost
+      tags: [generate]
+      summary: Save a generated post as draft
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SavePostInput"
+      responses:
+        "200":
+          description: Saved post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostResponse"
+
+  # ── Publish ───────────────────────────────────────────────────────────────
+  /publish/now:
+    post:
+      operationId: publishNow
+      tags: [publish]
+      summary: Publish post immediately to social media
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PublishNowInput"
+      responses:
+        "200":
+          description: Publish result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublishResult"
+
+  /publish/schedule:
+    post:
+      operationId: schedulePost
+      tags: [publish]
+      summary: Schedule a post for later
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SchedulePostInput"
+      responses:
+        "200":
+          description: Scheduled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostResponse"
+
+  /publish/scheduled:
+    get:
+      operationId: getScheduledPosts
+      tags: [publish]
+      summary: Get all scheduled posts
+      responses:
+        "200":
+          description: Scheduled posts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostsResponse"
+
+  /publish/scheduled/{id}:
+    delete:
+      operationId: cancelScheduledPost
+      tags: [publish]
+      summary: Cancel a scheduled post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Cancelled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /publish/failed:
+    get:
+      operationId: getFailedPosts
+      tags: [publish]
+      summary: Get posts whose publish failed
+      responses:
+        "200":
+          description: Failed posts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostsResponse"
+
+  /publish/drafts:
+    get:
+      operationId: getDraftPosts
+      tags: [publish]
+      summary: Get saved draft posts (not yet scheduled or published)
+      responses:
+        "200":
+          description: Draft posts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostsResponse"
+
+  /publish/history:
+    get:
+      operationId: getPostHistory
+      tags: [publish]
+      summary: Get published post history
+      responses:
+        "200":
+          description: Published posts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostsResponse"
+
+  # ── Templates ─────────────────────────────────────────────────────────────
+  /templates:
+    get:
+      operationId: getTemplates
+      tags: [templates]
+      summary: Get templates for merchant's industry
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: tone
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Templates
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TemplatesResponse"
+
+  /templates/{id}:
+    get:
+      operationId: getTemplate
+      tags: [templates]
+      summary: Get a single template
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Template
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TemplateResponse"
+
+  # ── Analytics ─────────────────────────────────────────────────────────────
+  /analytics/overview:
+    get:
+      operationId: getAnalyticsOverview
+      tags: [analytics]
+      summary: Get analytics overview
+      responses:
+        "200":
+          description: Analytics overview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalyticsOverview"
+
+  /analytics/post/{id}:
+    get:
+      operationId: getPostAnalytics
+      tags: [analytics]
+      summary: Get detailed analytics for a post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Post analytics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostAnalytics"
+
+  /analytics/sync:
+    post:
+      operationId: syncAnalytics
+      tags: [analytics]
+      summary: Sync analytics from Meta
+      responses:
+        "200":
+          description: Synced
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ── Media Library ─────────────────────────────────────────────────────────
+  /media:
+    get:
+      operationId: getMediaLibrary
+      tags: [media]
+      summary: Get merchant's media library
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [image, video]
+        - name: favorited
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Media items
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaLibraryResponse"
+
+  /media/storage-status:
+    get:
+      operationId: getStorageStatus
+      tags: [media]
+      summary: Get storage usage
+      responses:
+        "200":
+          description: Storage status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StorageStatus"
+
+  /media/{id}/favorite:
+    post:
+      operationId: toggleFavorite
+      tags: [media]
+      summary: Toggle favorite on a media item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Toggled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /media/{id}:
+    delete:
+      operationId: deleteMedia
+      tags: [media]
+      summary: Delete a media item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ── Brand Assets ──────────────────────────────────────────────────────────
+  /brand-assets:
+    get:
+      operationId: getBrandAssets
+      tags: [media]
+      summary: List the merchant's brand assets (photos, flyers, videos)
+      responses:
+        "200":
+          description: Brand assets
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BrandAssetsReply"
+    post:
+      operationId: registerBrandAsset
+      tags: [media]
+      summary: Register a brand asset after a direct-to-storage upload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BrandAssetRegisterInput"
+      responses:
+        "200":
+          description: Registered asset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BrandAssetReply"
+
+  /brand-assets/upload-url:
+    post:
+      operationId: createBrandAssetUploadUrl
+      tags: [media]
+      summary: Create a short-lived signed URL for uploading a brand asset directly to storage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BrandAssetUploadUrlInput"
+      responses:
+        "200":
+          description: Signed upload URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BrandAssetUploadUrlReply"
+
+  /brand-assets/{id}:
+    delete:
+      operationId: deleteBrandAsset
+      tags: [media]
+      summary: Delete a brand asset
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ── Social ────────────────────────────────────────────────────────────────
+  /social/accounts:
+    get:
+      operationId: getSocialAccounts
+      tags: [social]
+      summary: Get connected social accounts
+      responses:
+        "200":
+          description: Social accounts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SocialAccountsResponse"
+
+  /social/accounts/{platform}:
+    delete:
+      operationId: disconnectSocial
+      tags: [social]
+      summary: Disconnect a social account
+      parameters:
+        - name: platform
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Disconnected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /platform-credentials:
+    get:
+      operationId: getPlatformCredentials
+      tags: [social]
+      summary: List stored posting credentials (never returns passwords)
+      responses:
+        "200":
+          description: Stored credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatformCredentialsReply"
+
+  /platform-credentials/{platform}:
+    put:
+      operationId: savePlatformCredential
+      tags: [social]
+      summary: Store posting credentials for a platform (X, WhatsApp)
+      parameters:
+        - name: platform
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [x, whatsapp]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatformCredentialInput"
+      responses:
+        "200":
+          description: Saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatformCredentialSavedReply"
+    delete:
+      operationId: deletePlatformCredential
+      tags: [social]
+      summary: Remove stored posting credentials for a platform
+      parameters:
+        - name: platform
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /platform-credentials/{platform}/test:
+    post:
+      operationId: testPlatformCredential
+      tags: [social]
+      summary: Validate stored credentials against the live API without publishing
+      parameters:
+        - name: platform
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [x, whatsapp]
+      responses:
+        "200":
+          description: Test result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatformCredentialTestReply"
+
+  # ── Billing ───────────────────────────────────────────────────────────────
+  /billing/plans:
+    get:
+      operationId: getBillingPlans
+      tags: [billing]
+      summary: Get available subscription plans
+      responses:
+        "200":
+          description: Plans
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BillingPlansResponse"
+
+  /billing/subscription:
+    get:
+      operationId: getSubscription
+      tags: [billing]
+      summary: Get current subscription
+      responses:
+        "200":
+          description: Subscription
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionResponse"
+
+  /billing/checkout:
+    post:
+      operationId: createCheckout
+      tags: [billing]
+      summary: Create Stripe checkout session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckoutInput"
+      responses:
+        "200":
+          description: Checkout URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckoutResponse"
+
+  /billing/portal:
+    post:
+      operationId: createPortal
+      tags: [billing]
+      summary: Create Stripe customer portal session
+      responses:
+        "200":
+          description: Portal URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PortalResponse"
+
+  # ── Recurring Schedules ───────────────────────────────────────────────────
+  /recurring-schedules:
+    get:
+      operationId: getRecurringSchedules
+      tags: [recurring]
+      summary: Get recurring schedules
+      responses:
+        "200":
+          description: Schedules
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecurringSchedulesResponse"
+    post:
+      operationId: createRecurringSchedule
+      tags: [recurring]
+      summary: Create a recurring schedule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecurringScheduleInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecurringScheduleResponse"
+
+  /recurring-schedules/{id}:
+    patch:
+      operationId: updateRecurringSchedule
+      tags: [recurring]
+      summary: Update a recurring schedule
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecurringScheduleUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+    delete:
+      operationId: deleteRecurringSchedule
+      tags: [recurring]
+      summary: Delete a recurring schedule
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ── Customers (CRM) ─────────────────────────────────────────────────────────
+  /customers:
+    get:
+      operationId: getCustomers
+      tags: [customers]
+      summary: Get the merchant's customer contacts
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [existing, prospect]
+        - name: q
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Customer contacts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomersResponse"
+    post:
+      operationId: createCustomer
+      tags: [customers]
+      summary: Add a customer contact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerResponse"
+
+  /customers/import:
+    post:
+      operationId: importCustomers
+      tags: [customers]
+      summary: Bulk import customer contacts from a spreadsheet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerImportInput"
+      responses:
+        "200":
+          description: Import result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerImportResult"
+
+  /customers/{id}:
+    patch:
+      operationId: updateCustomer
+      tags: [customers]
+      summary: Update a customer contact
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+    delete:
+      operationId: deleteCustomer
+      tags: [customers]
+      summary: Delete a customer contact
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ── Lead Generation ─────────────────────────────────────────────────────────
+  /leads/zips:
+    get:
+      operationId: getWatchedZips
+      tags: [leads]
+      summary: List the merchant's watched zip codes
+      responses:
+        "200":
+          description: Watched zip codes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WatchedZipsResult"
+    post:
+      operationId: addWatchedZip
+      tags: [leads]
+      summary: Watch a zip code for new leads
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WatchedZipInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WatchedZipResult"
+
+  /leads/zips/{id}:
+    delete:
+      operationId: deleteWatchedZip
+      tags: [leads]
+      summary: Stop watching a zip code
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /leads:
+    get:
+      operationId: getLeads
+      tags: [leads]
+      summary: List leads delivered to the merchant
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [new, saved, all]
+      responses:
+        "200":
+          description: Leads
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeadsResult"
+
+  /leads/{id}:
+    patch:
+      operationId: updateLead
+      tags: [leads]
+      summary: Save, dismiss, or mark a lead as read
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LeadUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /leads/scan:
+    post:
+      operationId: scanLeads
+      tags: [leads]
+      summary: Manually trigger a lead scan for the merchant's watched zips
+      responses:
+        "200":
+          description: Scan result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeadScanResult"
+
+  # ── Loyalty — customer auth ─────────────────────────────────────────────────
+  /loyalty/auth/signup:
+    post:
+      operationId: loyaltyCustomerSignup
+      tags: [loyalty-auth]
+      summary: Create a Loyalty App customer account (email or phone based)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoyaltyCustomerSignupInput"
+      responses:
+        "201":
+          description: Account created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoyaltyAuthReply"
+
+  /loyalty/auth/login:
+    post:
+      operationId: loyaltyCustomerLogin
+      tags: [loyalty-auth]
+      summary: Log in as a Loyalty App customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoyaltyCustomerLoginInput"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoyaltyAuthReply"
+
+  /loyalty/auth/me:
+    get:
+      operationId: getLoyaltyCustomerMe
+      tags: [loyalty-auth]
+      summary: Get the current Loyalty App customer
+      responses:
+        "200":
+          description: Current customer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoyaltyCustomerReply"
+
+  # ── Loyalty — customer side ─────────────────────────────────────────────────
+  /loyalty/join-info/{code}:
+    get:
+      operationId: getJoinInfo
+      tags: [loyalty]
+      summary: Public lookup of a business by loyalty join code (for the QR landing page)
+      security: []
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Business info for the join code
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JoinInfoReply"
+        "404":
+          description: No business found for that code
+
+  /loyalty/businesses:
+    get:
+      operationId: listLoyaltyBusinesses
+      tags: [loyalty]
+      summary: Public directory of businesses with an active loyalty program, searchable by name or industry
+      security: []
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Case-insensitive match against business name
+        - name: industry
+          in: query
+          schema:
+            type: string
+          description: Filter to a single industry
+        - name: zip
+          in: query
+          schema:
+            type: string
+          description: Customer's postal code — businesses with the same zip are ranked first
+        - name: city
+          in: query
+          schema:
+            type: string
+          description: Customer's city — businesses in the same city rank ahead of the rest
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 30
+          description: Maximum businesses to return per page
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Number of businesses to skip (for paging)
+      responses:
+        "200":
+          description: Participating businesses (nearest first when zip/city provided)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiscoverBusinessesReply"
+
+  /loyalty/wallet/join:
+    post:
+      operationId: joinBusiness
+      tags: [loyalty]
+      summary: Join a business loyalty program via QR/invite code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JoinBusinessInput"
+      responses:
+        "201":
+          description: Joined
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletEntryReply"
+
+  /loyalty/wallet:
+    get:
+      operationId: getWallet
+      tags: [loyalty]
+      summary: Get the customer's wallet (all joined businesses with points)
+      responses:
+        "200":
+          description: Wallet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletReply"
+
+  /loyalty/wallet/{merchantId}:
+    get:
+      operationId: getWalletBusiness
+      tags: [loyalty]
+      summary: Get one joined business — points, reward tiers, and active deals
+      parameters:
+        - name: merchantId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Business detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletBusinessDetailReply"
+    patch:
+      operationId: updateWalletBusiness
+      tags: [loyalty]
+      summary: Mute notifications or opt out of a business program
+      parameters:
+        - name: merchantId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WalletBusinessUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /loyalty/feed:
+    get:
+      operationId: getLoyaltyFeed
+      tags: [loyalty]
+      summary: Get the customer's deal notification feed
+      parameters:
+        - name: unread
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 30
+          description: Maximum feed items to return per page
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: >-
+            Opaque keyset cursor (the next_cursor of the previous page). Omit
+            for the first page. Keyset paging keeps pages stable while new
+            deliveries arrive.
+      responses:
+        "200":
+          description: Feed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoyaltyFeedReply"
+
+  /loyalty/feed/{deliveryId}/open:
+    post:
+      operationId: openDealDelivery
+      tags: [loyalty]
+      summary: Record that the customer opened a deal notification
+      parameters:
+        - name: deliveryId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /loyalty/redemptions:
+    get:
+      operationId: getMyRedemptions
+      tags: [loyalty]
+      summary: List the customer's redemptions
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 30
+          description: Maximum redemptions to return per page
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Number of redemptions to skip (for paging)
+      responses:
+        "200":
+          description: Redemptions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RedemptionsReply"
+    post:
+      operationId: createRedemption
+      tags: [loyalty]
+      summary: Redeem a reward tier or deal — returns a confirmation code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRedemptionInput"
+      responses:
+        "201":
+          description: Redemption created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RedemptionReply"
+
+  /loyalty/push-token:
+    post:
+      operationId: registerLoyaltyPushToken
+      tags: [loyalty]
+      summary: Register (or clear) the customer's Expo push token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterPushTokenInput"
+      responses:
+        "200":
+          description: Saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /loyalty/profile:
+    patch:
+      operationId: updateLoyaltyProfile
+      tags: [loyalty]
+      summary: Update the customer's marketing profile (email, DOB, gender, interests) — completing it awards bonus points
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateLoyaltyProfileInput"
+      responses:
+        "200":
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateLoyaltyProfileReply"
+
+  # ── Loyalty — business side ─────────────────────────────────────────────────
+  /loyalty/business/settings:
+    get:
+      operationId: getLoyaltySettings
+      tags: [loyalty-business]
+      summary: Get loyalty settings (join code + event type points config)
+      responses:
+        "200":
+          description: Settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoyaltySettingsReply"
+    patch:
+      operationId: updateLoyaltySettings
+      tags: [loyalty-business]
+      summary: Update event type points config
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoyaltySettingsUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoyaltySettingsReply"
+
+  /loyalty/business/settings/regenerate-code:
+    post:
+      operationId: regenerateJoinCode
+      tags: [loyalty-business]
+      summary: Regenerate the business join code
+      responses:
+        "200":
+          description: New code
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoyaltySettingsReply"
+
+  /loyalty/business/members:
+    get:
+      operationId: getLoyaltyMembers
+      tags: [loyalty-business]
+      summary: List the business's opted-in loyalty members
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Members
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoyaltyMembersReply"
+
+  /loyalty/business/members/{customerId}/credit:
+    post:
+      operationId: creditPoints
+      tags: [loyalty-business]
+      summary: Credit points to a member for a configured event type
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreditPointsInput"
+      responses:
+        "200":
+          description: Credited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreditPointsReply"
+
+  /loyalty/business/reward-tiers:
+    get:
+      operationId: getRewardTiers
+      tags: [loyalty-business]
+      summary: List reward tiers
+      responses:
+        "200":
+          description: Reward tiers
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RewardTiersReply"
+    post:
+      operationId: createRewardTier
+      tags: [loyalty-business]
+      summary: Create a reward tier
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RewardTierInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RewardTierReply"
+
+  /loyalty/business/reward-tiers/{id}:
+    patch:
+      operationId: updateRewardTier
+      tags: [loyalty-business]
+      summary: Update a reward tier
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RewardTierUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RewardTierReply"
+    delete:
+      operationId: deleteRewardTier
+      tags: [loyalty-business]
+      summary: Delete a reward tier
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /loyalty/business/deals:
+    get:
+      operationId: getBusinessDeals
+      tags: [loyalty-business]
+      summary: List the business's deals
+      responses:
+        "200":
+          description: Deals
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DealsReply"
+    post:
+      operationId: createDeal
+      tags: [loyalty-business]
+      summary: Post a deal — fans out notifications to opted-in members
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DealInput"
+      responses:
+        "201":
+          description: Deal created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DealCreateReply"
+
+  /loyalty/business/deals/audience:
+    get:
+      operationId: getDealAudience
+      tags: [loyalty-business]
+      summary: Count opted-in members matching a deal's targeting filters
+      parameters:
+        - name: gender
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: interests
+          in: query
+          required: false
+          description: Comma-separated interest labels
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Audience size
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DealAudienceReply"
+
+  /loyalty/business/birthday-reward:
+    get:
+      operationId: getBirthdayReward
+      tags: [loyalty-business]
+      summary: Get the automatic birthday reward configuration
+      responses:
+        "200":
+          description: Birthday reward settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BirthdayRewardReply"
+    patch:
+      operationId: updateBirthdayReward
+      tags: [loyalty-business]
+      summary: Enable/disable the automatic birthday reward
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BirthdayRewardInput"
+      responses:
+        "200":
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BirthdayRewardReply"
+
+  /loyalty/business/deals/{id}/analytics:
+    get:
+      operationId: getDealAnalytics
+      tags: [loyalty-business]
+      summary: Get delivered/opened/redeemed counts for a deal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deal analytics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DealAnalyticsReply"
+
+  /loyalty/business/analytics:
+    get:
+      operationId: getLoyaltyBusinessAnalytics
+      tags: [loyalty-business]
+      summary: Aggregated loyalty analytics — per-deal stats and open events
+      responses:
+        "200":
+          description: Loyalty analytics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoyaltyBusinessAnalyticsReply"
+
+  /loyalty/business/earn-codes:
+    post:
+      operationId: createEarnCode
+      tags: [loyalty-business]
+      summary: Create a short-lived earn code (shown as a QR at checkout) customers scan to claim points
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EarnCodeInput"
+      responses:
+        "201":
+          description: Earn code created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EarnCodeReply"
+
+  /loyalty/earn:
+    post:
+      operationId: claimEarnCode
+      tags: [loyalty]
+      summary: Claim points by scanning/entering a merchant earn code (credited exactly once)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClaimEarnInput"
+      responses:
+        "200":
+          description: Points credited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClaimEarnReply"
+
+  /loyalty/business/redemptions/confirm:
+    post:
+      operationId: confirmRedemption
+      tags: [loyalty-business]
+      summary: Confirm a customer's redemption by confirmation code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConfirmRedemptionInput"
+      responses:
+        "200":
+          description: Confirmed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RedemptionReply"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required: [status]
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+      required: [success]
+
+    # ── Chat (FAQ bot) ──────────────────────────────────────────────────────
+    ChatFaqMessage:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+      required: [role, content]
+
+    ChatFaqInput:
+      type: object
+      properties:
+        message:
+          type: string
+        history:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatFaqMessage"
+      required: [message]
+
+    ChatFaqReply:
+      type: object
+      properties:
+        reply:
+          type: string
+      required: [reply]
+
+    # ── Auth ──────────────────────────────────────────────────────────────
+    SignupInput:
+      type: object
+      required: [business_name, email, password]
+      properties:
+        business_name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        client_fingerprint:
+          type: ["string", "null"]
+
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    ForgotPasswordInput:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+
+    ResetPasswordInput:
+      type: object
+      required: [token, password]
+      properties:
+        token:
+          type: string
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        merchant:
+          $ref: "#/components/schemas/Merchant"
+        requires_phone_verification:
+          type: ["boolean", "null"]
+      required: [token, merchant]
+
+    # ── Merchant ──────────────────────────────────────────────────────────
+    Merchant:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        business_name:
+          type: string
+        industry:
+          type: ["string", "null"]
+        city:
+          type: ["string", "null"]
+        zip_code:
+          type: ["string", "null"]
+        address:
+          type: ["string", "null"]
+          description: Street address shown to loyalty customers for directions
+        timezone:
+          type: ["string", "null"]
+        logo_url:
+          type: ["string", "null"]
+        brand_color_1:
+          type: ["string", "null"]
+        brand_color_2:
+          type: ["string", "null"]
+        brand_voice:
+          type: ["string", "null"]
+        business_description:
+          type: ["string", "null"]
+        website_url:
+          type: ["string", "null"]
+        social_instagram:
+          type: ["string", "null"]
+        social_x:
+          type: ["string", "null"]
+        social_facebook:
+          type: ["string", "null"]
+        social_whatsapp:
+          type: ["string", "null"]
+        subscription_tier:
+          type: string
+          enum: [free, starter, growth, agency]
+        trial_ends_at:
+          type: ["string", "null"]
+        onboarding_completed:
+          type: boolean
+        onboarding_step:
+          type: ["integer", "null"]
+        email_verified:
+          type: boolean
+        post_count_this_month:
+          type: ["integer", "null"]
+        created_at:
+          type: string
+      required: [id, email, business_name, subscription_tier, onboarding_completed, email_verified]
+
+    MerchantResponse:
+      type: object
+      properties:
+        merchant:
+          $ref: "#/components/schemas/Merchant"
+      required: [merchant]
+
+    MerchantUpdate:
+      type: object
+      properties:
+        business_name:
+          type: string
+        city:
+          type: string
+        zip_code:
+          type: string
+        address:
+          type: string
+        timezone:
+          type: string
+        logo_url:
+          type: string
+        brand_color_1:
+          type: string
+        brand_color_2:
+          type: string
+        brand_voice:
+          type: string
+        business_description:
+          type: string
+        website_url:
+          type: string
+        social_instagram:
+          type: string
+        social_x:
+          type: string
+        social_facebook:
+          type: string
+        social_whatsapp:
+          type: string
+        industry:
+          type: string
+        onboarding_completed:
+          type: boolean
+        onboarding_step:
+          type: integer
+
+    MerchantStats:
+      type: object
+      properties:
+        total_posts:
+          type: integer
+        posts_this_month:
+          type: integer
+        subscription_tier:
+          type: string
+        created_count:
+          type: integer
+        draft_count:
+          type: integer
+        scheduled_count:
+          type: integer
+        sent_count:
+          type: integer
+        engagement:
+          type: object
+          properties:
+            reach:
+              type: integer
+            likes:
+              type: integer
+            comments:
+              type: integer
+          required: [reach, likes, comments]
+        last_synced_at:
+          type: ["string", "null"]
+          description: When engagement metrics were last refreshed from the Graph API
+      required: [total_posts, posts_this_month, subscription_tier, created_count, draft_count, scheduled_count, sent_count, engagement]
+
+    WeatherData:
+      type: object
+      properties:
+        temp:
+          type: ["number", "null"]
+        description:
+          type: ["string", "null"]
+        icon:
+          type: ["string", "null"]
+        city:
+          type: ["string", "null"]
+
+    # ── Suggestions ───────────────────────────────────────────────────────
+    Suggestion:
+      type: object
+      properties:
+        id:
+          type: string
+        caption_preview:
+          type: string
+        theme:
+          type: string
+        tone:
+          type: string
+        angle:
+          type: string
+        context_snapshot:
+          type: ["object", "null"]
+        generated_at:
+          type: string
+      required: [id, caption_preview, theme, tone, angle]
+
+    SuggestionsResponse:
+      type: object
+      properties:
+        suggestions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Suggestion"
+      required: [suggestions]
+
+    RefreshSuggestionsInput:
+      type: object
+      properties:
+        checkin_input:
+          type: ["string", "null"]
+
+    # ── Generate ──────────────────────────────────────────────────────────
+    GenerateCaptionsInput:
+      type: object
+      properties:
+        tone:
+          type: string
+        custom_prompt:
+          type: ["string", "null"]
+        template_id:
+          type: ["string", "null"]
+        checkin_input:
+          type: ["string", "null"]
+        platform:
+          type: string
+
+    Caption:
+      type: object
+      properties:
+        text:
+          type: string
+        hashtags:
+          type: array
+          items:
+            type: string
+        theme:
+          type: string
+        tone:
+          type: string
+        angle:
+          type: string
+        why:
+          type: ["string", "null"]
+      required: [text, hashtags, theme, tone, angle]
+
+    CaptionsResult:
+      type: object
+      properties:
+        captions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Caption"
+        image_suggestion:
+          type: ["string", "null"]
+        context_used:
+          type: ["object", "null"]
+      required: [captions]
+
+    GenerateImageInput:
+      type: object
+      properties:
+        caption:
+          type: ["string", "null"]
+        image_suggestion:
+          type: ["string", "null"]
+        style:
+          type: ["string", "null"]
+
+    ImageResult:
+      type: object
+      properties:
+        image_url:
+          type: string
+        prompt_used:
+          type: ["string", "null"]
+        library_saved:
+          type: boolean
+        warning:
+          type: ["string", "null"]
+        warning_code:
+          type: ["string", "null"]
+          description: Machine-readable reason when library_saved is false (e.g. "storage_full").
+      required: [image_url]
+
+    GenerateVideoInput:
+      type: object
+      properties:
+        caption:
+          type: ["string", "null"]
+        video_suggestion:
+          type: ["string", "null"]
+
+    VideoGenResult:
+      type: object
+      properties:
+        video_url:
+          type: string
+        thumbnail_url:
+          type: ["string", "null"]
+        prompt_used:
+          type: ["string", "null"]
+        library_saved:
+          type: boolean
+        warning:
+          type: ["string", "null"]
+        warning_code:
+          type: ["string", "null"]
+          description: Machine-readable reason when library_saved is false (e.g. "storage_full").
+      required: [video_url]
+
+    SavePostInput:
+      type: object
+      required: [caption, platform]
+      properties:
+        caption:
+          type: string
+        image_url:
+          type: ["string", "null"]
+        video_url:
+          type: ["string", "null"]
+        platform:
+          type: string
+        theme:
+          type: ["string", "null"]
+        tone:
+          type: ["string", "null"]
+        angle:
+          type: ["string", "null"]
+        context_used:
+          type: ["object", "null"]
+        template_id:
+          type: ["string", "null"]
+        client_key:
+          type: ["string", "null"]
+          description: >
+            Optional client idempotency key. Identical saves (same key +
+            platform) within a short window return the existing draft instead
+            of creating a duplicate, and /publish/now will never publish two
+            rows carrying the same key.
+          pattern: "^[A-Za-z0-9_-]{8,120}$"
+
+    # ── Post ──────────────────────────────────────────────────────────────
+    Post:
+      type: object
+      properties:
+        id:
+          type: string
+        merchant_id:
+          type: string
+        caption:
+          type: string
+        image_url:
+          type: ["string", "null"]
+        video_url:
+          type: ["string", "null"]
+        platform:
+          type: string
+        status:
+          type: string
+          enum: [draft, scheduled, published, failed]
+        theme:
+          type: ["string", "null"]
+        tone:
+          type: ["string", "null"]
+        angle:
+          type: ["string", "null"]
+        scheduled_at:
+          type: ["string", "null"]
+        published_at:
+          type: ["string", "null"]
+        last_error:
+          type: ["string", "null"]
+          description: Why the most recent publish attempt failed; null after a successful publish.
+        retrying:
+          type: boolean
+          description: True for a scheduled post whose last automatic publish attempt hit a transient error and will be retried on a later sweep.
+        reach:
+          type: ["integer", "null"]
+        likes:
+          type: ["integer", "null"]
+        comments:
+          type: ["integer", "null"]
+        engagement:
+          type: ["integer", "null"]
+        created_at:
+          type: string
+      required: [id, merchant_id, caption, platform, status, created_at]
+
+    PostResponse:
+      type: object
+      properties:
+        post:
+          $ref: "#/components/schemas/Post"
+        deduped:
+          type: ["boolean", "null"]
+          description: True when an existing draft with the same client_key was returned instead of creating a new row.
+      required: [post]
+
+    PostsResponse:
+      type: object
+      properties:
+        posts:
+          type: array
+          items:
+            $ref: "#/components/schemas/Post"
+      required: [posts]
+
+    PublishNowInput:
+      type: object
+      properties:
+        post_id:
+          type: ["string", "null"]
+        caption:
+          type: string
+        image_url:
+          type: ["string", "null"]
+        video_url:
+          type: ["string", "null"]
+        platform:
+          type: string
+      required: [caption, platform]
+
+    PublishResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+        results:
+          type: array
+          items:
+            type: object
+      required: [success]
+
+    SchedulePostInput:
+      type: object
+      required: [caption, platform, scheduled_at]
+      properties:
+        post_id:
+          type: ["string", "null"]
+        caption:
+          type: string
+        image_url:
+          type: ["string", "null"]
+        video_url:
+          type: ["string", "null"]
+        platform:
+          type: string
+        scheduled_at:
+          type: string
+        client_key:
+          type: ["string", "null"]
+          description: >
+            Optional client idempotency key. Identical schedule requests (same
+            key + platform) within a short window return the existing scheduled
+            post instead of creating a duplicate, and the scheduled sweep will
+            never publish two rows carrying the same key.
+
+    # ── Template ──────────────────────────────────────────────────────────
+    Template:
+      type: object
+      properties:
+        id:
+          type: string
+        industry:
+          type: string
+        category:
+          type: string
+        tone:
+          type: string
+        angle:
+          type: string
+        skeleton_text:
+          type: string
+        example_output:
+          type: ["string", "null"]
+        hashtag_suggestions:
+          type: ["array", "null"]
+          items:
+            type: string
+        recently_used:
+          type: ["boolean", "null"]
+      required: [id, industry, category, tone, angle, skeleton_text]
+
+    TemplatesResponse:
+      type: object
+      properties:
+        templates:
+          type: array
+          items:
+            $ref: "#/components/schemas/Template"
+      required: [templates]
+
+    TemplateResponse:
+      type: object
+      properties:
+        template:
+          $ref: "#/components/schemas/Template"
+      required: [template]
+
+    # ── Analytics ─────────────────────────────────────────────────────────
+    AnalyticsOverview:
+      type: object
+      properties:
+        total_posts:
+          type: integer
+        totals:
+          type: object
+          properties:
+            reach:
+              type: integer
+            likes:
+              type: integer
+            comments:
+              type: integer
+            engagement:
+              type: integer
+        best_post:
+          type: ["object", "null"]
+        avg_engagement_rate:
+          type: ["number", "null"]
+        recent_posts:
+          type: array
+          items:
+            $ref: "#/components/schemas/Post"
+        last_synced_at:
+          type: ["string", "null"]
+          description: When engagement metrics were last refreshed from the Graph API
+      required: [total_posts]
+
+    PostAnalytics:
+      type: object
+      properties:
+        post:
+          $ref: "#/components/schemas/Post"
+        performance_vs_average:
+          type: ["number", "null"]
+        insight:
+          type: ["string", "null"]
+      required: [post]
+
+    # ── Media ─────────────────────────────────────────────────────────────
+    MediaItem:
+      type: object
+      properties:
+        id:
+          type: string
+        merchant_id:
+          type: string
+        media_type:
+          type: string
+          enum: [image, video]
+        url:
+          type: string
+        thumbnail_url:
+          type: ["string", "null"]
+        caption_text:
+          type: ["string", "null"]
+        is_favorited:
+          type: boolean
+        file_size_bytes:
+          type: ["integer", "null"]
+        created_at:
+          type: string
+      required: [id, merchant_id, media_type, url, is_favorited, created_at]
+
+    MediaLibraryResponse:
+      type: object
+      properties:
+        media:
+          type: array
+          items:
+            $ref: "#/components/schemas/MediaItem"
+      required: [media]
+
+    BrandAsset:
+      type: object
+      properties:
+        id:
+          type: string
+        merchant_id:
+          type: string
+        asset_type:
+          type: string
+          enum: [photo, flyer, video, post]
+        url:
+          type: string
+        file_name:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        file_size_bytes:
+          type: ["integer", "null"]
+        created_at:
+          type: string
+      required: [id, merchant_id, asset_type, url, created_at]
+
+    BrandAssetsReply:
+      type: object
+      properties:
+        assets:
+          type: array
+          items:
+            $ref: "#/components/schemas/BrandAsset"
+      required: [assets]
+
+    BrandAssetUploadUrlInput:
+      type: object
+      properties:
+        file_name:
+          type: string
+          description: Original file name (used to derive the storage path)
+      required: [file_name]
+
+    BrandAssetUploadUrlReply:
+      type: object
+      properties:
+        upload_url:
+          type: string
+          description: Signed URL to PUT the file bytes to (expires shortly)
+        storage_path:
+          type: string
+          description: Storage path to pass back when registering the asset
+        max_bytes:
+          type: integer
+          description: Maximum allowed file size in bytes
+      required: [upload_url, storage_path, max_bytes]
+
+    BrandAssetRegisterInput:
+      type: object
+      properties:
+        storage_path:
+          type: string
+          description: Storage path returned by the upload-url endpoint
+        asset_type:
+          type: string
+          enum: [photo, flyer, video, post]
+        file_name:
+          type: string
+        description:
+          type: string
+      required: [storage_path, asset_type, file_name]
+
+    BrandAssetReply:
+      type: object
+      properties:
+        asset:
+          $ref: "#/components/schemas/BrandAsset"
+      required: [asset]
+
+    StorageStatus:
+      type: object
+      properties:
+        tier:
+          type: string
+        bytes_used:
+          type: integer
+        bytes_limit:
+          type: integer
+        bytes_used_formatted:
+          type: string
+        bytes_limit_formatted:
+          type: string
+        percent_used:
+          type: integer
+        image_count:
+          type: integer
+        video_count:
+          type: integer
+        retention_days:
+          type: ["integer", "null"]
+        video_library_enabled:
+          type: boolean
+        bucket_ready:
+          type: boolean
+          description: Whether the post-images storage bucket exists (auto-created when possible)
+      required: [tier, bytes_used, bytes_limit, percent_used, image_count, video_count, video_library_enabled, bucket_ready]
+
+    # ── Social ────────────────────────────────────────────────────────────
+    SocialAccount:
+      type: object
+      properties:
+        platform:
+          type: string
+        is_connected:
+          type: boolean
+        platform_username:
+          type: ["string", "null"]
+        connected_at:
+          type: ["string", "null"]
+        token_expires_at:
+          type: ["string", "null"]
+        needs_reconnect:
+          type: boolean
+          description: True when the stored token expired or was revoked and the merchant must reconnect the account.
+      required: [platform, is_connected, needs_reconnect]
+
+    PlatformCredential:
+      type: object
+      properties:
+        platform:
+          type: string
+        username:
+          type: string
+        has_password:
+          type: boolean
+        updated_at:
+          type: string
+        last_tested_at:
+          type: ["string", "null"]
+        last_test_ok:
+          type: ["boolean", "null"]
+        needs_resave:
+          type: boolean
+          description: True when the platform rejected the stored token during a publish (401/403) and the merchant must re-save credentials.
+        last_auth_error:
+          type: ["string", "null"]
+          description: The auth error the platform returned when it rejected the stored credentials, if any.
+      required: [platform, username, has_password, updated_at, needs_resave]
+
+    PlatformCredentialsReply:
+      type: object
+      properties:
+        credentials:
+          type: array
+          items:
+            $ref: "#/components/schemas/PlatformCredential"
+      required: [credentials]
+
+    PlatformCredentialInput:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+          format: password
+      required: [username, password]
+
+    PlatformCredentialSavedReply:
+      type: object
+      properties:
+        success:
+          type: boolean
+        platform:
+          type: string
+        username:
+          type: string
+      required: [success, platform, username]
+
+    PlatformCredentialTestReply:
+      type: object
+      properties:
+        success:
+          type: boolean
+        platform:
+          type: string
+        detail:
+          type: string
+        error:
+          type: string
+      required: [success, platform]
+
+    SocialAccountsResponse:
+      type: object
+      properties:
+        accounts:
+          type: array
+          items:
+            $ref: "#/components/schemas/SocialAccount"
+      required: [accounts]
+
+    # ── Billing ───────────────────────────────────────────────────────────
+    BillingPlan:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        price:
+          type: integer
+        interval:
+          type: string
+        features:
+          type: array
+          items:
+            type: string
+        post_limit:
+          type: ["integer", "null"]
+      required: [id, name, price, interval, features]
+
+    BillingPlansResponse:
+      type: object
+      properties:
+        plans:
+          type: array
+          items:
+            $ref: "#/components/schemas/BillingPlan"
+      required: [plans]
+
+    Subscription:
+      type: object
+      properties:
+        tier:
+          type: string
+        status:
+          type: ["string", "null"]
+        current_period_end:
+          type: ["string", "null"]
+        cancel_at_period_end:
+          type: ["boolean", "null"]
+        stripe_customer_id:
+          type: ["string", "null"]
+      required: [tier]
+
+    SubscriptionResponse:
+      type: object
+      properties:
+        subscription:
+          $ref: "#/components/schemas/Subscription"
+      required: [subscription]
+
+    CheckoutInput:
+      type: object
+      required: [tier]
+      properties:
+        tier:
+          type: string
+          enum: [starter, growth, agency]
+
+    CheckoutResponse:
+      type: object
+      properties:
+        url:
+          type: string
+      required: [url]
+
+    PortalResponse:
+      type: object
+      properties:
+        url:
+          type: string
+      required: [url]
+
+    # ── Recurring ─────────────────────────────────────────────────────────
+    RecurringSchedule:
+      type: object
+      properties:
+        id:
+          type: string
+        merchant_id:
+          type: string
+        name:
+          type: string
+        tone:
+          type: ["string", "null"]
+        platform:
+          type: string
+        day_of_week:
+          type: ["integer", "null"]
+        time_of_day:
+          type: string
+        timezone:
+          type: string
+        is_active:
+          type: boolean
+        next_run_at:
+          type: ["string", "null"]
+        created_at:
+          type: string
+      required: [id, merchant_id, name, platform, time_of_day, timezone, is_active, created_at]
+
+    RecurringSchedulesResponse:
+      type: object
+      properties:
+        schedules:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecurringSchedule"
+      required: [schedules]
+
+    RecurringScheduleInput:
+      type: object
+      required: [name, time_of_day]
+      properties:
+        name:
+          type: string
+        template_id:
+          type: ["string", "null"]
+        tone:
+          type: ["string", "null"]
+        platform:
+          type: string
+        day_of_week:
+          type: ["integer", "null"]
+        time_of_day:
+          type: string
+        timezone:
+          type: ["string", "null"]
+
+    RecurringScheduleUpdate:
+      type: object
+      properties:
+        is_active:
+          type: boolean
+        name:
+          type: string
+        day_of_week:
+          type: ["integer", "null"]
+        time_of_day:
+          type: string
+
+    RecurringScheduleResponse:
+      type: object
+      properties:
+        schedule:
+          $ref: "#/components/schemas/RecurringSchedule"
+      required: [schedule]
+
+    # ── Customers (CRM) ──────────────────────────────────────────────────────
+    Customer:
+      type: object
+      properties:
+        id:
+          type: string
+        merchant_id:
+          type: string
+        name:
+          type: string
+        email:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        birthday:
+          type: ["string", "null"]
+        type:
+          type: string
+          enum: [existing, prospect]
+        notes:
+          type: ["string", "null"]
+        created_at:
+          type: string
+      required: [id, merchant_id, name, type, created_at]
+
+    CustomerInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        email:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        birthday:
+          type: ["string", "null"]
+        type:
+          type: string
+          enum: [existing, prospect]
+        notes:
+          type: ["string", "null"]
+
+    CustomerUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        birthday:
+          type: ["string", "null"]
+        type:
+          type: string
+          enum: [existing, prospect]
+        notes:
+          type: ["string", "null"]
+
+    CustomersResponse:
+      type: object
+      properties:
+        customers:
+          type: array
+          items:
+            $ref: "#/components/schemas/Customer"
+      required: [customers]
+
+    CustomerResponse:
+      type: object
+      properties:
+        customer:
+          $ref: "#/components/schemas/Customer"
+      required: [customer]
+
+    CustomerImportInput:
+      type: object
+      required: [customers]
+      properties:
+        customers:
+          type: array
+          items:
+            $ref: "#/components/schemas/CustomerInput"
+
+    CustomerImportResult:
+      type: object
+      properties:
+        imported:
+          type: integer
+        skipped:
+          type: integer
+      required: [imported, skipped]
+
+    # ── Lead Generation ──────────────────────────────────────────────────────
+    WatchedZip:
+      type: object
+      properties:
+        id:
+          type: string
+        merchant_id:
+          type: string
+        zip_code:
+          type: string
+        industry:
+          type: string
+        created_at:
+          type: string
+      required: [id, merchant_id, zip_code, industry, created_at]
+
+    WatchedZipInput:
+      type: object
+      required: [zip_code]
+      properties:
+        zip_code:
+          type: string
+        industry:
+          type: ["string", "null"]
+
+    WatchedZipsResult:
+      type: object
+      properties:
+        zips:
+          type: array
+          items:
+            $ref: "#/components/schemas/WatchedZip"
+      required: [zips]
+
+    WatchedZipResult:
+      type: object
+      properties:
+        zip:
+          $ref: "#/components/schemas/WatchedZip"
+      required: [zip]
+
+    Lead:
+      type: object
+      properties:
+        id:
+          type: string
+        lead_id:
+          type: string
+        status:
+          type: string
+          enum: [new, saved, dismissed]
+        unread:
+          type: boolean
+        zip_code:
+          type: string
+        industry:
+          type: string
+        platform:
+          type: string
+        summary:
+          type: string
+        post_text:
+          type: string
+        post_url:
+          type: string
+        intent_confidence:
+          type: number
+        author:
+          type: ["string", "null"]
+        created_at:
+          type: string
+      required:
+        [id, lead_id, status, unread, zip_code, industry, platform, summary, post_text, post_url, intent_confidence, created_at]
+
+    LeadsResult:
+      type: object
+      properties:
+        leads:
+          type: array
+          items:
+            $ref: "#/components/schemas/Lead"
+      required: [leads]
+
+    LeadUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [new, saved, dismissed]
+        read:
+          type: boolean
+
+    LeadScanResult:
+      type: object
+      properties:
+        combos:
+          type: integer
+        postsScanned:
+          type: integer
+        leadsCreated:
+          type: integer
+        deliveries:
+          type: integer
+      required: [combos, postsScanned, leadsCreated, deliveries]
+
+    # ── Loyalty — customer auth ──────────────────────────────────────────────
+    LoyaltyCustomer:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        dob:
+          type: ["string", "null"]
+          description: Date of birth (YYYY-MM-DD)
+        gender:
+          type: ["string", "null"]
+        interests:
+          type: array
+          items:
+            type: string
+        profile_completed_at:
+          type: ["string", "null"]
+        created_at:
+          type: string
+      required: [id, name, created_at, interests, profile_completed_at]
+
+    LoyaltyCustomerSignupInput:
+      type: object
+      required: [name, password]
+      properties:
+        name:
+          type: string
+        email:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        password:
+          type: string
+
+    LoyaltyCustomerLoginInput:
+      type: object
+      required: [identifier, password]
+      properties:
+        identifier:
+          type: string
+          description: Email address or phone number
+        password:
+          type: string
+
+    LoyaltyAuthReply:
+      type: object
+      properties:
+        token:
+          type: string
+        customer:
+          $ref: "#/components/schemas/LoyaltyCustomer"
+      required: [token, customer]
+
+    LoyaltyCustomerReply:
+      type: object
+      properties:
+        customer:
+          $ref: "#/components/schemas/LoyaltyCustomer"
+      required: [customer]
+
+    UpdateLoyaltyProfileInput:
+      type: object
+      properties:
+        email:
+          type: ["string", "null"]
+        dob:
+          type: ["string", "null"]
+          description: Date of birth (YYYY-MM-DD)
+        gender:
+          type: ["string", "null"]
+        interests:
+          type: array
+          items:
+            type: string
+
+    UpdateLoyaltyProfileReply:
+      type: object
+      properties:
+        customer:
+          $ref: "#/components/schemas/LoyaltyCustomer"
+        bonus_awarded:
+          type: integer
+          description: Points credited per joined business for completing the profile (0 if already completed or no fields missing)
+        businesses_credited:
+          type: integer
+          description: Number of joined businesses that received the completion bonus
+      required: [customer, bonus_awarded, businesses_credited]
+
+    # ── Loyalty — wallet ─────────────────────────────────────────────────────
+    JoinBusinessInput:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: string
+
+    JoinInfoReply:
+      type: object
+      properties:
+        business_name:
+          type: string
+        logo_url:
+          type: ["string", "null"]
+        brand_color_1:
+          type: ["string", "null"]
+        code:
+          type: string
+      required: [business_name, logo_url, brand_color_1, code]
+
+    DiscoverBusiness:
+      type: object
+      properties:
+        merchant_id:
+          type: string
+        business_name:
+          type: string
+        logo_url:
+          type: ["string", "null"]
+        brand_color_1:
+          type: ["string", "null"]
+        industry:
+          type: ["string", "null"]
+        city:
+          type: ["string", "null"]
+        address:
+          type: ["string", "null"]
+          description: Street address (when the business has provided one)
+        code:
+          type: string
+          description: Loyalty join code — pass to the join endpoint to join with one tap
+        nearby:
+          type: boolean
+          description: True when the business matched the customer's zip or city
+      required: [merchant_id, business_name, logo_url, brand_color_1, industry, city, code, nearby]
+
+    DiscoverBusinessesReply:
+      type: object
+      properties:
+        businesses:
+          type: array
+          items:
+            $ref: "#/components/schemas/DiscoverBusiness"
+        has_more:
+          type: boolean
+          description: True when more businesses exist beyond this page
+        offset:
+          type: integer
+          description: Offset that produced this page
+      required: [businesses, has_more, offset]
+
+    WalletEntry:
+      type: object
+      properties:
+        merchant_id:
+          type: string
+        business_name:
+          type: string
+        logo_url:
+          type: ["string", "null"]
+        brand_color_1:
+          type: ["string", "null"]
+        industry:
+          type: ["string", "null"]
+        city:
+          type: ["string", "null"]
+        address:
+          type: ["string", "null"]
+          description: Street address for maps/directions (when provided)
+        points:
+          type: integer
+        visits:
+          type: integer
+        opted_in:
+          type: boolean
+        muted:
+          type: boolean
+        last_activity:
+          type: string
+        joined_at:
+          type: string
+      required: [merchant_id, business_name, points, visits, opted_in, muted, last_activity, joined_at]
+
+    WalletEntryReply:
+      type: object
+      properties:
+        membership:
+          $ref: "#/components/schemas/WalletEntry"
+      required: [membership]
+
+    WalletReply:
+      type: object
+      properties:
+        wallet:
+          type: array
+          items:
+            $ref: "#/components/schemas/WalletEntry"
+      required: [wallet]
+
+    RewardTier:
+      type: object
+      properties:
+        id:
+          type: string
+        merchant_id:
+          type: string
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        points_required:
+          type: integer
+        active:
+          type: boolean
+        created_at:
+          type: string
+      required: [id, merchant_id, name, points_required, active, created_at]
+
+    Deal:
+      type: object
+      properties:
+        id:
+          type: string
+        merchant_id:
+          type: string
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        starts_at:
+          type: ["string", "null"]
+        ends_at:
+          type: ["string", "null"]
+        target_gender:
+          type: ["string", "null"]
+          description: Gender this deal was targeted to (null = everyone)
+        target_interests:
+          type: ["array", "null"]
+          items:
+            type: string
+          description: Interests this deal was targeted to (null/empty = everyone)
+        created_at:
+          type: string
+      required: [id, merchant_id, title, created_at]
+
+    WalletBusinessDetailReply:
+      type: object
+      properties:
+        membership:
+          $ref: "#/components/schemas/WalletEntry"
+        reward_tiers:
+          type: array
+          items:
+            $ref: "#/components/schemas/RewardTier"
+        deals:
+          type: array
+          items:
+            $ref: "#/components/schemas/Deal"
+      required: [membership, reward_tiers, deals]
+
+    WalletBusinessUpdate:
+      type: object
+      properties:
+        muted:
+          type: boolean
+        opted_in:
+          type: boolean
+
+    # ── Loyalty — feed ───────────────────────────────────────────────────────
+    FeedItem:
+      type: object
+      properties:
+        delivery_id:
+          type: string
+        deal:
+          $ref: "#/components/schemas/Deal"
+        business_name:
+          type: string
+        delivered_at:
+          type: string
+        opened_at:
+          type: ["string", "null"]
+      required: [delivery_id, deal, business_name, delivered_at]
+
+    LoyaltyFeedReply:
+      type: object
+      properties:
+        feed:
+          type: array
+          items:
+            $ref: "#/components/schemas/FeedItem"
+        has_more:
+          type: boolean
+        next_cursor:
+          type: ["string", "null"]
+          description: Cursor for the next page, or null when has_more is false
+      required: [feed, has_more, next_cursor]
+
+    RegisterPushTokenInput:
+      type: object
+      properties:
+        token:
+          type: ["string", "null"]
+          description: Expo push token, or null to unregister
+
+    # ── Loyalty — redemptions ────────────────────────────────────────────────
+    CreateRedemptionInput:
+      type: object
+      required: [merchant_id]
+      properties:
+        merchant_id:
+          type: string
+        reward_tier_id:
+          type: ["string", "null"]
+        deal_id:
+          type: ["string", "null"]
+
+    Redemption:
+      type: object
+      properties:
+        id:
+          type: string
+        merchant_id:
+          type: string
+        customer_id:
+          type: string
+        reward_tier_id:
+          type: ["string", "null"]
+        deal_id:
+          type: ["string", "null"]
+        points_spent:
+          type: integer
+        code:
+          type: string
+        status:
+          type: string
+          enum: [pending, confirmed, cancelled, expired]
+        created_at:
+          type: string
+        confirmed_at:
+          type: ["string", "null"]
+        expires_at:
+          type: ["string", "null"]
+          description: When a pending code stops being redeemable (computed by the server)
+      required: [id, merchant_id, customer_id, points_spent, code, status, created_at]
+
+    RedemptionReply:
+      type: object
+      properties:
+        redemption:
+          $ref: "#/components/schemas/Redemption"
+      required: [redemption]
+
+    RedemptionsReply:
+      type: object
+      properties:
+        redemptions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Redemption"
+        has_more:
+          type: boolean
+        offset:
+          type: integer
+      required: [redemptions, has_more, offset]
+
+    ConfirmRedemptionInput:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: string
+
+    # ── Loyalty — business settings ──────────────────────────────────────────
+    LoyaltySettingsReply:
+      type: object
+      properties:
+        join_code:
+          type: string
+        event_types:
+          type: object
+          additionalProperties:
+            type: integer
+      required: [join_code, event_types]
+
+    LoyaltySettingsUpdate:
+      type: object
+      required: [event_types]
+      properties:
+        event_types:
+          type: object
+          additionalProperties:
+            type: integer
+
+    # ── Loyalty — business members ───────────────────────────────────────────
+    LoyaltyMember:
+      type: object
+      properties:
+        customer_id:
+          type: string
+        name:
+          type: string
+        email:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        points:
+          type: integer
+        visits:
+          type: integer
+        last_activity:
+          type: string
+        joined_at:
+          type: string
+      required: [customer_id, name, points, visits, last_activity, joined_at]
+
+    LoyaltyMembersReply:
+      type: object
+      properties:
+        members:
+          type: array
+          items:
+            $ref: "#/components/schemas/LoyaltyMember"
+      required: [members]
+
+    CreditPointsInput:
+      type: object
+      required: [event_type]
+      properties:
+        event_type:
+          type: string
+        points:
+          type: ["integer", "null"]
+          description: Optional override; defaults to the configured points for the event type
+
+    CreditPointsReply:
+      type: object
+      properties:
+        points_credited:
+          type: integer
+        total_points:
+          type: integer
+      required: [points_credited, total_points]
+
+    # ── Loyalty — earn codes ─────────────────────────────────────────────────
+    EarnCodeInput:
+      type: object
+      required: [points]
+      properties:
+        points:
+          type: integer
+          description: Points a customer earns by scanning this code (1–100000)
+        single_use:
+          type: boolean
+          description: When true, only the first customer to scan can claim; otherwise each member may claim once until expiry
+        expires_in_minutes:
+          type: integer
+          minimum: 1
+          maximum: 1440
+          description: Minutes until the code expires (default 15)
+
+    EarnCodeReply:
+      type: object
+      properties:
+        code:
+          type: string
+        points:
+          type: integer
+        single_use:
+          type: boolean
+        expires_at:
+          type: string
+      required: [code, points, single_use, expires_at]
+
+    ClaimEarnInput:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: string
+
+    ClaimEarnReply:
+      type: object
+      properties:
+        points_credited:
+          type: integer
+        total_points:
+          type: integer
+        merchant_id:
+          type: string
+        business_name:
+          type: string
+      required: [points_credited, total_points, merchant_id, business_name]
+
+    # ── Loyalty — reward tiers ───────────────────────────────────────────────
+    RewardTierInput:
+      type: object
+      required: [name, points_required]
+      properties:
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        points_required:
+          type: integer
+        active:
+          type: boolean
+
+    RewardTierUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        points_required:
+          type: integer
+        active:
+          type: boolean
+
+    RewardTierReply:
+      type: object
+      properties:
+        reward_tier:
+          $ref: "#/components/schemas/RewardTier"
+      required: [reward_tier]
+
+    RewardTiersReply:
+      type: object
+      properties:
+        reward_tiers:
+          type: array
+          items:
+            $ref: "#/components/schemas/RewardTier"
+      required: [reward_tiers]
+
+    # ── Loyalty — deals & analytics ──────────────────────────────────────────
+    DealInput:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        starts_at:
+          type: ["string", "null"]
+        ends_at:
+          type: ["string", "null"]
+        target_gender:
+          type: ["string", "null"]
+          description: Only deliver to members with this gender on file (null = everyone)
+        target_interests:
+          type: ["array", "null"]
+          items:
+            type: string
+          description: Only deliver to members with at least one of these interests (null/empty = everyone)
+
+    DealAudienceReply:
+      type: object
+      properties:
+        count:
+          type: integer
+      required: [count]
+
+    BirthdayRewardInput:
+      type: object
+      required: [enabled]
+      properties:
+        enabled:
+          type: boolean
+        points:
+          type: ["integer", "null"]
+
+    BirthdayRewardReply:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        points:
+          type: ["integer", "null"]
+      required: [enabled, points]
+
+    DemographicCount:
+      type: object
+      properties:
+        label:
+          type: string
+        count:
+          type: integer
+      required: [label, count]
+
+    LoyaltyDemographics:
+      type: object
+      properties:
+        total_members:
+          type: integer
+        profiles_completed:
+          type: integer
+        with_birthday:
+          type: integer
+        by_gender:
+          type: array
+          items:
+            $ref: "#/components/schemas/DemographicCount"
+        by_interest:
+          type: array
+          items:
+            $ref: "#/components/schemas/DemographicCount"
+        birthdays_by_month:
+          type: array
+          items:
+            type: integer
+      required: [total_members, profiles_completed, with_birthday, by_gender, by_interest, birthdays_by_month]
+
+    DealCreateReply:
+      type: object
+      properties:
+        deal:
+          $ref: "#/components/schemas/Deal"
+        delivered:
+          type: integer
+      required: [deal, delivered]
+
+    DealsReply:
+      type: object
+      properties:
+        deals:
+          type: array
+          items:
+            $ref: "#/components/schemas/Deal"
+      required: [deals]
+
+    DealAnalyticsReply:
+      type: object
+      properties:
+        deal_id:
+          type: string
+        delivered:
+          type: integer
+        opened:
+          type: integer
+        redeemed:
+          type: integer
+      required: [deal_id, delivered, opened, redeemed]
+
+    DealStat:
+      type: object
+      properties:
+        deal_id:
+          type: string
+        title:
+          type: string
+        created_at:
+          type: string
+        delivered:
+          type: integer
+        opened:
+          type: integer
+        redeemed:
+          type: integer
+      required: [deal_id, title, created_at, delivered, opened, redeemed]
+
+    DealOpenEvent:
+      type: object
+      properties:
+        deal_id:
+          type: string
+        opened_at:
+          type: string
+      required: [deal_id, opened_at]
+
+    LoyaltyBusinessAnalyticsReply:
+      type: object
+      properties:
+        deals:
+          type: array
+          items:
+            $ref: "#/components/schemas/DealStat"
+        open_events:
+          type: array
+          items:
+            $ref: "#/components/schemas/DealOpenEvent"
+        demographics:
+          $ref: "#/components/schemas/LoyaltyDemographics"
+      required: [deals, open_events, demographics]
